@@ -1,26 +1,21 @@
-
-
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Accordion, Badge, Button, Card } from "react-bootstrap";
 import MainScreen from "../../components/MainScreen";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteMessageAction, agentallmessages } from "../../actions/messagesActions";
+import { agentallmessages } from "../../actions/messagesActions";
 import Loading from "../../components/Loading";
 import ErrorMessage from "../../components/ErrorMessage";
 import ReactMarkdown from "react-markdown";
 
 function AgentMyMessages({ history, search }) {
   const dispatch = useDispatch();
+  const [respondingMessageId, setRespondingMessageId] = useState(null);
 
   const messageList = useSelector((state) => state.messageList);
   const { loading, error, messages } = messageList;
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-
-  // const messageDelete = useSelector((state) => state.messageDelete);
-  // const { loading: loadingDelete, error: errorDelete, success: successDelete } =
-  //   messageDelete;
 
   useEffect(() => {
     dispatch(agentallmessages());
@@ -29,42 +24,57 @@ function AgentMyMessages({ history, search }) {
     }
   }, [dispatch, history, userInfo]);
 
-  // const deleteHandler = (id) => {
-  //   if (window.confirm("Are you sure?")) {
-  //     dispatch(deleteMessageAction(id));
-  //   }
-  // };
-
   const messagesWithResponse = messages ? messages.filter((message) => message.Response) : [];
   const messagesWithoutResponse = messages ? messages.filter((message) => !message.Response) : [];
 
-  const sortedMessages = [
-    ...messagesWithoutResponse.sort((a, b) => {
-      if (a.category === "Lone Issue") return -1;
-      if (b.category === "Lone Issue") return 1;
-      if (a.category === "Number Update" && b.category !== "Number Update") return -1;
-      if (a.category !== "Number Update" && b.category === "Number Update") return 1;
-      if (a.category === "Form Issue" && b.category !== "Form Issue") return -1;
-      if (a.category !== "Form Issue" && b.category === "Form Issue") return 1;
-      if (a.category === "Quary" && b.category !== "Quary") return 1;
-      if (a.category !== "Quary" && b.category === "Quary") return -1;
-      return 0;
-    }),
-    ...messagesWithResponse,
-  ];
+  const sortedMessages = messages
+    ? [
+      ...messagesWithResponse.sort((a, b) => {
+        if (a.Response === "agentresponding" && b.Response !== "agentresponding") return -1;
+        if (a.Response !== "agentresponding" && b.Response === "agentresponding") return 1;
+        // Additional sorting logic based on other conditions if necessary
+        return 0;
+      }),
+        ...messagesWithoutResponse.sort((a, b) => {
+          if (a.Response === "agentresponding") return -1;
+          if (b.Response === "agentresponding") return 1;
+          if (a.category === "Lone Issue") return -1;
+          if (b.category === "Lone Issue") return 1;
+          if (a.category === "Number Update" && b.category !== "Number Update") return -1;
+          if (a.category !== "Number Update" && b.category === "Number Update") return 1;
+          if (a.category === "Form Issue" && b.category !== "Form Issue") return -1;
+          if (a.category !== "Form Issue" && b.category === "Form Issue") return 1;
+          if (a.category === "Query" && b.category !== "Query") return 1;
+          if (a.category !== "Query" && b.category === "Query") return -1;
+          return 0;
+        }),
+       
+      ]
+    : [];
+
+  const isMessageResponding = (messageId) => {
+    return respondingMessageId === messageId;
+  };
+
+  const disableButton = (message) => {
+    return message.Response || isMessageResponding(message._id);
+  };
+
+  const handleResponse = (messageId) => {
+    setRespondingMessageId(messageId);
+  };
+
+  const handleFinishResponse = () => {
+    setRespondingMessageId(null);
+  };
 
   return (
     <MainScreen title={`Welcome Back ${userInfo && userInfo.name}..`}>
       {error && <ErrorMessage variant="danger">{error}</ErrorMessage>}
-      {/* {errorDelete && <ErrorMessage variant="danger">{errorDelete}</ErrorMessage>} */}
       {loading && <Loading />}
-      {/* {loadingDelete && <Loading />} */}
       {sortedMessages &&
         sortedMessages
-          .filter(
-            (filteredMessage) =>
-              filteredMessage.customername.toLowerCase().includes(search.toLowerCase())
-          )
+          .filter((filteredMessage) => filteredMessage.customername.toLowerCase().includes(search.toLowerCase())).reverse()
           .map((message) => (
             <Accordion key={message._id}>
               <Card style={{ margin: 10 }}>
@@ -87,11 +97,16 @@ function AgentMyMessages({ history, search }) {
                   <div>
                     <Button
                       href={`/messages/respon/${message._id}`}
-                      disabled={message.Response}
-                      className={message.Response ? "btn btn-danger" : ""}
+                      disabled={disableButton(message)}
+                      className={message.Response ===  "agentresponsing" ? "btn btn-success" : message.Response ? "btn btn-danger" : ""}
+                      onClick={() => handleResponse(message._id)}
                     >
-                      {message.Response ? "Responded" : "Response"}
+                      {message.Response !== "agentresponsing" ? "Responsed" : message.Response ?  "responding" :  "Response" }
                     </Button>
+    
+
+
+
                   </div>
                 </Card.Header>
                 <Accordion.Collapse eventKey="0">
@@ -128,3 +143,8 @@ function AgentMyMessages({ history, search }) {
 }
 
 export default AgentMyMessages;
+
+
+
+
+

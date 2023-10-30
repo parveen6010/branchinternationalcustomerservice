@@ -3,7 +3,7 @@ import MainScreen from "../../components/MainScreen";
 import axios from "axios";
 import { Button, Card, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteMessageAction, agentupdateMessageAction  } from "../../actions/messagesActions";
+import { agentupdateMessageAction } from "../../actions/messagesActions";
 import ErrorMessage from "../../components/ErrorMessage";
 import Loading from "../../components/Loading";
 import ReactMarkdown from "react-markdown";
@@ -20,40 +20,36 @@ function SingleMessage({ match, history }) {
   const messageUpdate = useSelector((state) => state.messageUpdate);
   const { loading, error } = messageUpdate;
 
-  // const messageDelete = useSelector((state) => state.messageDelete);
-  // const { loading: loadingDelete, error: errorDelete } = messageDelete;
-
-  // const deleteHandler = (id) => {
-  //   if (window.confirm("Are you sure?")) {
-  //     dispatch(deleteMessageAction(id));
-  //   }
-  //   history.push("/Agentmymessages");
-  // };
-
   useEffect(() => {
     const fetching = async () => {
-      const { data } = await axios.get(`/api/messages/${match.params.id}`);
-
-      setCustomername(data.customername);
-      setContent(data.content);
-      setCategory(data.category);
-      setDate(data.updatedAt);
+      try {
+        const { data } = await axios.get(`/api/messages/${match.params.id}`);
+        setCustomername(data.customername);
+        setContent(data.content);
+        setCategory(data.category);
+        setDate(data.updatedAt);
+        
+        if (response === undefined) {
+          dispatch(agentupdateMessageAction(match.params.id, "agentresponsing"));
+        }
+      } catch (error) {
+        // Handle any potential errors here
+        console.error("Error fetching message:", error);
+      }
     };
 
     fetching();
-  }, [match.params.id, date]);
+  }, [match.params.id, date, dispatch]);
 
-  const resetHandler = () => {
-    setCustomername("");
-    setCategory("");
-    setContent("");
+  const goback = () => {
+    dispatch(agentupdateMessageAction(match.params.id, response));    
+    history.push("/Agentmymessages");
   };
 
   const updateHandler = (e) => {
     e.preventDefault();
-    dispatch(agentupdateMessageAction(  match.params.id, response));
+    dispatch(agentupdateMessageAction(match.params.id, response));
     if (!response) return;
-    resetHandler();
     history.push("/Agentmymessages");
   };
 
@@ -63,11 +59,7 @@ function SingleMessage({ match, history }) {
         <Card.Header>Customer Query</Card.Header>
         <Card.Body>
           <Form onSubmit={updateHandler}>
-            {/* {loadingDelete && <Loading />} */}
             {error && <ErrorMessage variant="danger">{error}</ErrorMessage>}
-            {/* {errorDelete && (
-              <ErrorMessage variant="danger">{errorDelete}</ErrorMessage>
-            )} */}
             <Form.Group controlId="title">
               <Form.Label>Name</Form.Label>
               <Form.Control
@@ -90,7 +82,6 @@ function SingleMessage({ match, history }) {
                 disabled
               />
             </Form.Group>
-         
 
             <Form.Group controlId="content">
               <Form.Label>Category</Form.Label>
@@ -111,21 +102,19 @@ function SingleMessage({ match, history }) {
                 rows={4}
                 value={response}
                 onChange={(e) => setResponse(e.target.value)}
-              
               />
             </Form.Group>
 
             {loading && <Loading size={50} />}
             <Button variant="primary" type="submit">
-            Response
+              Response
             </Button>
-            {/* <Button
-              className="mx-2"
-              variant="danger"
-              onClick={() => deleteHandler(match.params.id)}
+            <Button variant="danger" type="submit" style={{ marginLeft: '4px' }}
+            onClick={goback}
             >
-              Delete Query
-            </Button> */}
+               Don't know
+              </Button>
+
           </Form>
         </Card.Body>
 
@@ -138,4 +127,3 @@ function SingleMessage({ match, history }) {
 }
 
 export default SingleMessage;
-
