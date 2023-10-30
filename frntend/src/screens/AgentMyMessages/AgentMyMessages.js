@@ -35,9 +35,8 @@ function AgentMyMessages({ history, search }) {
         // Additional sorting logic based on other conditions if necessary
         return 0;
       }),
-        ...messagesWithoutResponse.sort((a, b) => {
-          if (a.Response === "agentresponding") return -1;
-          if (b.Response === "agentresponding") return 1;
+        ...messagesWithoutResponse.sort((b, a) => {
+         
           if (a.category === "Lone Issue") return -1;
           if (b.category === "Lone Issue") return 1;
           if (a.category === "Number Update" && b.category !== "Number Update") return -1;
