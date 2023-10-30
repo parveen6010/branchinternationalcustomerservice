@@ -120,18 +120,18 @@ function AgentMyMessages({ history, search }) {
                         Created on{" "}
                         <cite title="Source Title">
                           {message.createdAt.substring(0, 10)}
-                        </cite>
-                      </footer>
-                      {message.Response && (
+                          {message.Response && (
                         <div>
                           <h4>
-                            <Badge variant="success">Responded</Badge>
+                            <Badge variant="success">Response</Badge>
                           </h4>
                           <h5>
                             <ReactMarkdown>{message.Response}</ReactMarkdown>
                           </h5>
                         </div>
                       )}
+                        </cite>
+                      </footer>
                     </blockquote>
                   </Card.Body>
                 </Accordion.Collapse>
