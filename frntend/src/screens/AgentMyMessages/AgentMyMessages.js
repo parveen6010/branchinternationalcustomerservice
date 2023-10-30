@@ -100,7 +100,7 @@ function AgentMyMessages({ history, search }) {
                       className={message.Response ===  "agentresponsing" ? "btn btn-success" : message.Response ? "btn btn-danger" : ""}
                       onClick={() => handleResponse(message._id)}
                     >
-                      {message.Response !== "agentresponsing" ? "Responsed" : message.Response ?  "responding" :  "Response" }
+                      { message.Response == undefined ?  "Response" : message.Response !== "agentresponsing" ? "Responsed" : message.Response ?  "Responding"  : "Response"}
                     </Button>
     
 
