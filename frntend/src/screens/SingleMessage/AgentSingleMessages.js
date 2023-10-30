@@ -98,7 +98,7 @@ function SingleMessage({ match, history }) {
               <Form.Label>Response</Form.Label>
               <Form.Control
                 as="textarea"
-                placeholder="Response"
+                placeholder="Response else click on Don't know"
                 rows={4}
                 value={response}
                 onChange={(e) => setResponse(e.target.value)}
