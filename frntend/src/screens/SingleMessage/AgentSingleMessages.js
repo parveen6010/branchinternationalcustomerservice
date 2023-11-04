@@ -29,6 +29,21 @@ function SingleMessage({ match}) {
   
   const history = useHistory();
 
+  useEffect(() => {
+    const confirmNavigation = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+      dispatch(agentupdateMessageAction(match.params.id, response));
+    };
+
+    window.addEventListener("beforeunload", confirmNavigation);
+
+    return () => {
+      window.removeEventListener("beforeunload", confirmNavigation);
+      dispatch(agentupdateMessageAction(match.params.id, response));
+ 
+    };
+  }, []);
 
 
 
