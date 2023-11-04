@@ -8,7 +8,11 @@ import ErrorMessage from "../../components/ErrorMessage";
 import Loading from "../../components/Loading";
 import ReactMarkdown from "react-markdown";
 
-function SingleMessage({ match, history }) {
+
+import { useHistory } from "react-router-dom";
+
+
+function SingleMessage({ match}) {
   const [customername, setCustomername] = useState();
   const [content, setContent] = useState();
   const [category, setCategory] = useState();
@@ -20,6 +24,14 @@ function SingleMessage({ match, history }) {
   const messageUpdate = useSelector((state) => state.messageUpdate);
   const { loading, error } = messageUpdate;
 
+
+
+  
+  const history = useHistory();
+
+
+
+
   useEffect(() => {
     const fetching = async () => {
       try {
@@ -28,11 +40,10 @@ function SingleMessage({ match, history }) {
         setContent(data.content);
         setCategory(data.category);
         setDate(data.updatedAt);
-
+        
         if (response === undefined) {
-          dispatch(agentupdateMessageAction(match.params.id, "agentresponsing"));
+          dispatch(agentupdateMessageAction(match.  params.id, "agentresponsing"));
         }
-      
       } catch (error) {
         // Handle any potential errors here
         console.error("Error fetching message:", error);
@@ -40,30 +51,15 @@ function SingleMessage({ match, history }) {
     };
 
     fetching();
-  }, [match.params.id, date, dispatch, response]);
-
-  useEffect(() => {
-    const confirmNavigation = (e) => {
-      e.preventDefault();
-      e.returnValue = "";
-      dispatch(agentupdateMessageAction(match.params.id, response));
-    };
-
-    window.addEventListener("beforeunload", confirmNavigation);
-
-    return () => {
-      window.removeEventListener("beforeunload", confirmNavigation);
-      dispatch(agentupdateMessageAction(match.params.id, response));
- 
-    };
-  }, []);
+  }, [match.params.id, date, dispatch]);
 
 
-  const handleLeavePage = () => {
-    dispatch(agentupdateMessageAction(match.params.id, response));
-      history.push("/Agentmymessages");
+  const goback = () => {
+    dispatch(agentupdateMessageAction(match.params.id, response));    
+    history.push("/Agentmymessages");
   };
-  
+
+
 
   const updateHandler = (e) => {
     e.preventDefault();
@@ -72,6 +68,7 @@ function SingleMessage({ match, history }) {
     history.push("/Agentmymessages");
   };
 
+  
   return (
     <MainScreen title="Customer Query">
       <Card>
@@ -128,14 +125,12 @@ function SingleMessage({ match, history }) {
             <Button variant="primary" type="submit">
               Response
             </Button>
-            <Button
-              variant="danger"
-              type="button"
-              style={{ marginLeft: "4px" }}
-              onClick={handleLeavePage}
+            <Button variant="danger" type="submit" style={{ marginLeft: '4px' }}
+            onClick={goback}
             >
-              Don't know
-            </Button>
+               Don't know
+              </Button>
+
           </Form>
         </Card.Body>
 
@@ -148,3 +143,6 @@ function SingleMessage({ match, history }) {
 }
 
 export default SingleMessage;
+
+
+
