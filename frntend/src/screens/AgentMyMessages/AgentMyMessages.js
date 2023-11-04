@@ -45,6 +45,7 @@ function AgentMyMessages({ history, search }) {
           if (a.category !== "Form Issue" && b.category === "Form Issue") return 1;
           if (a.category === "Query" && b.category !== "Query") return 1;
           if (a.category !== "Query" && b.category === "Query") return -1;
+           // Additional sorting logic based on other conditions if necessary
           return 0;
         }),
        
@@ -142,8 +143,3 @@ function AgentMyMessages({ history, search }) {
 }
 
 export default AgentMyMessages;
-
-
-
-
-

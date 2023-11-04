@@ -28,10 +28,11 @@ function SingleMessage({ match, history }) {
         setContent(data.content);
         setCategory(data.category);
         setDate(data.updatedAt);
-        
+
         if (response === undefined) {
           dispatch(agentupdateMessageAction(match.params.id, "agentresponsing"));
         }
+      
       } catch (error) {
         // Handle any potential errors here
         console.error("Error fetching message:", error);
@@ -39,12 +40,30 @@ function SingleMessage({ match, history }) {
     };
 
     fetching();
-  }, [match.params.id, date, dispatch]);
+  }, [match.params.id, date, dispatch, response]);
 
-  const goback = () => {
-    dispatch(agentupdateMessageAction(match.params.id, response));    
-    history.push("/Agentmymessages");
+  useEffect(() => {
+    const confirmNavigation = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+      dispatch(agentupdateMessageAction(match.params.id, response));
+    };
+
+    window.addEventListener("beforeunload", confirmNavigation);
+
+    return () => {
+      window.removeEventListener("beforeunload", confirmNavigation);
+      dispatch(agentupdateMessageAction(match.params.id, response));
+ 
+    };
+  }, []);
+
+
+  const handleLeavePage = () => {
+    dispatch(agentupdateMessageAction(match.params.id, response));
+      history.push("/Agentmymessages");
   };
+  
 
   const updateHandler = (e) => {
     e.preventDefault();
@@ -109,12 +128,14 @@ function SingleMessage({ match, history }) {
             <Button variant="primary" type="submit">
               Response
             </Button>
-            <Button variant="danger" type="submit" style={{ marginLeft: '4px' }}
-            onClick={goback}
+            <Button
+              variant="danger"
+              type="button"
+              style={{ marginLeft: "4px" }}
+              onClick={handleLeavePage}
             >
-               Don't know
-              </Button>
-
+              Don't know
+            </Button>
           </Form>
         </Card.Body>
 
